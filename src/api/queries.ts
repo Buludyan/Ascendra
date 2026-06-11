@@ -1,7 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { api } from './client'
-import type { VMAction, VmInventoryFilters } from '../domain/types'
+import type {
+  TemplateDraft,
+  TemplateUpdate,
+  VMAction,
+  VmInventoryFilters,
+} from '../domain/types'
 
 export const queryKeys = {
   currentUser: ['current-user'] as const,
@@ -52,6 +57,38 @@ export function useTemplates() {
   return useQuery({
     queryKey: queryKeys.templates,
     queryFn: api.getTemplates,
+  })
+}
+
+export function useCreateTemplate() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (template: TemplateDraft) => api.createTemplate(template),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.templates,
+      })
+    },
+  })
+}
+
+export function useUpdateTemplate() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({
+      template,
+      templateId,
+    }: {
+      template: TemplateUpdate
+      templateId: string
+    }) => api.updateTemplate(templateId, template),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.templates,
+      })
+    },
   })
 }
 
