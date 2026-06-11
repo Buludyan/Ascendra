@@ -1,10 +1,13 @@
-import { Cpu, HardDrive, MemoryStick, Play } from 'lucide-react'
+import { useState } from 'react'
 
 import { useDeveloperMachines } from '../../api/queries'
+import { MachineCard } from './MachineCard'
+import { MachineDetail } from './MachineDetail'
 
 export function DeveloperDashboard() {
   const machinesQuery = useDeveloperMachines()
   const machines = machinesQuery.data ?? []
+  const [selectedVmId, setSelectedVmId] = useState<string | null>(null)
 
   if (machinesQuery.isLoading) {
     return (
@@ -38,6 +41,9 @@ export function DeveloperDashboard() {
     )
   }
 
+  const selectedMachine =
+    machines.find((machine) => machine.id === selectedVmId) ?? machines[0]
+
   return (
     <section className="space-y-5">
       <div>
@@ -48,73 +54,22 @@ export function DeveloperDashboard() {
           My machines
         </h2>
       </div>
-      <div className="grid gap-4 lg:grid-cols-3">
-        {machines.map((machine) => (
-          <article
-            className="rounded-3xl border border-slate-900/10 bg-white/80 p-5 shadow-sm shadow-slate-950/5"
-            key={machine.id}
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h3 className="text-lg font-semibold text-slate-950">
-                  {machine.name}
-                </h3>
-                <p className="text-sm text-slate-500">
-                  {machine.template.name} · {machine.region}
-                </p>
-              </div>
-              <span className="rounded-full bg-cyan-100 px-3 py-1 text-xs font-semibold text-cyan-900">
-                {machine.status}
-              </span>
-            </div>
-            <dl className="mt-6 grid gap-3 text-sm">
-              <Metric
-                icon={<Cpu aria-hidden="true" size={16} />}
-                label="CPU"
-                value={`${machine.cpuUsagePercent}%`}
-              />
-              <Metric
-                icon={<MemoryStick aria-hidden="true" size={16} />}
-                label="Memory"
-                value={`${machine.memoryUsagePercent}%`}
-              />
-              <Metric
-                icon={<HardDrive aria-hidden="true" size={16} />}
-                label="Disk"
-                value={`${machine.diskUsagePercent}%`}
-              />
-            </dl>
-            <a
-              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2"
-              href={`https://vscode.ascendra.test/workspaces/${machine.id}`}
-              target="_blank"
-            >
-              <Play aria-hidden="true" size={16} />
-              Open in IDE
-            </a>
-          </article>
-        ))}
+      <div className="grid gap-5 xl:grid-cols-[0.95fr_1.05fr]">
+        <div className="grid gap-4 lg:grid-cols-3 xl:grid-cols-1">
+          {machines.map((machine) => (
+            <MachineCard
+              isSelected={machine.id === selectedMachine.id}
+              key={machine.id}
+              machine={machine}
+              onSelect={setSelectedVmId}
+            />
+          ))}
+        </div>
+        <MachineDetail
+          fallbackMachine={selectedMachine}
+          vmId={selectedMachine.id}
+        />
       </div>
     </section>
-  )
-}
-
-function Metric({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode
-  label: string
-  value: string
-}) {
-  return (
-    <div className="flex items-center justify-between rounded-2xl bg-slate-100 px-3 py-2">
-      <dt className="flex items-center gap-2 text-slate-600">
-        {icon}
-        {label}
-      </dt>
-      <dd className="font-semibold text-slate-950">{value}</dd>
-    </div>
   )
 }
