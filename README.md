@@ -135,4 +135,8 @@ The mock backend keeps VM and template state in memory during the session, so li
 
 ## Deployment
 
-Deployment URL: pending.
+Deployment URL: https://ascendra-two.vercel.app/.
+
+The deployed Vite app uses the MSW mock backend by default, so `/api/*` calls
+work on static hosts like Vercel. Set `VITE_ENABLE_MOCKS=false` when deploying
+with a real backend that serves those API routes.

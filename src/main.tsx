@@ -14,8 +14,10 @@ const queryClient = new QueryClient({
   },
 })
 
+const shouldEnableMocking = import.meta.env.VITE_ENABLE_MOCKS !== 'false'
+
 async function enableMocking() {
-  if (!import.meta.env.DEV) {
+  if (!shouldEnableMocking) {
     return
   }
 
